@@ -2,13 +2,18 @@ import { FirebaseApp, getApp, getApps, initializeApp } from "firebase/app";
 import { Auth, getAuth } from "firebase/auth";
 import { Firestore, getFirestore } from "firebase/firestore";
 
+/**
+ * Web client config is public by design (restricted by Firebase Auth domain + rules).
+ * Hardcoded fallback avoids Vercel env embedding issues with NEXT_PUBLIC_ keys.
+ */
+// Prefer hardcoded web config so a bad/empty Vercel env cannot break auth.
 const firebaseConfig = {
-  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
-  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
-  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
-  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
-  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
+  apiKey: "AIzaSyBXD5SulzBVqLLpJm2XgFgKqnv9K54ui30",
+  authDomain: "english-word-book-4aa4a.firebaseapp.com",
+  projectId: "english-word-book-4aa4a",
+  storageBucket: "english-word-book-4aa4a.firebasestorage.app",
+  messagingSenderId: "84142773287",
+  appId: "1:84142773287:web:d2ab3ea82d7e3ba3272a02",
 };
 
 export function isFirebaseConfigured(): boolean {
@@ -22,9 +27,7 @@ export function isFirebaseConfigured(): boolean {
 
 function createFirebaseApp(): FirebaseApp {
   if (!isFirebaseConfigured()) {
-    throw new Error(
-      "Firebase 환경 변수가 없습니다. .env.local을 확인하세요. (로컬 모드로 계속할 수 있습니다)",
-    );
+    throw new Error("Firebase 설정이 없습니다.");
   }
 
   if (getApps().length > 0) {

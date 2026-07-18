@@ -1,6 +1,7 @@
 import {
   GoogleAuthProvider,
   onAuthStateChanged,
+  signInAnonymously,
   signInWithPopup,
   signOut as firebaseSignOut,
   type Unsubscribe,
@@ -23,7 +24,21 @@ export function subscribeAuth(
   return onAuthStateChanged(auth, listener, (error) => onError?.(error));
 }
 
-/** Same Google account on PC and phone → same Firestore uid → synced queue */
+/** Works immediately without Google; each browser gets its own uid until Google login is fixed */
+export async function ensureSignedIn(): Promise<User | null> {
+  if (!isFirebaseConfigured()) {
+    return null;
+  }
+
+  const auth = getFirebaseAuth();
+  if (auth.currentUser) {
+    return auth.currentUser;
+  }
+
+  const credential = await signInAnonymously(auth);
+  return credential.user;
+}
+
 export async function signInWithGoogle(): Promise<User> {
   if (!isFirebaseConfigured()) {
     throw new Error("Firebase가 설정되지 않았습니다.");

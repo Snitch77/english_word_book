@@ -11,6 +11,7 @@ import {
 } from "react";
 import type { User } from "firebase/auth";
 import {
+  ensureSignedIn,
   signInWithGoogle,
   signOut,
   subscribeAuth,
@@ -40,19 +41,36 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return;
     }
 
+    let active = true;
+
     const unsubscribe = subscribeAuth(
       (nextUser) => {
+        if (!active) return;
         setUser(nextUser);
         setLoading(false);
         setError(null);
       },
       (authError) => {
+        if (!active) return;
         setError(authError.message);
         setLoading(false);
       },
     );
 
-    return unsubscribe;
+    ensureSignedIn().catch((authError: unknown) => {
+      if (!active) return;
+      setError(
+        authError instanceof Error
+          ? authError.message
+          : "로그인에 실패했습니다.",
+      );
+      setLoading(false);
+    });
+
+    return () => {
+      active = false;
+      unsubscribe();
+    };
   }, [configured]);
 
   const signIn = useCallback(async () => {

@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { ReactNode } from "react";
-import { LoginPanel } from "@/components/auth/LoginPanel";
 import { useAuth } from "@/hooks/useAuth";
 
 const NAV = [
@@ -14,8 +13,7 @@ const NAV = [
 
 export function AppShell({ children }: { children: ReactNode }) {
   const pathname = usePathname();
-  const { mode, user, loading, signOutUser } = useAuth();
-  const needsLogin = mode === "firebase" && !loading && !user;
+  const { mode, loading } = useAuth();
 
   return (
     <div className="relative min-h-full overflow-x-hidden">
@@ -34,60 +32,38 @@ export function AppShell({ children }: { children: ReactNode }) {
           </span>
         </Link>
 
-        <div className="flex items-center gap-2 sm:gap-3">
-          {!needsLogin ? (
-            <nav className="flex items-center gap-1 sm:gap-2">
-              {NAV.map((item) => {
-                const active =
-                  item.href === "/"
-                    ? pathname === "/"
-                    : pathname.startsWith(item.href);
-                return (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    className={`rounded-md px-3 py-2 text-sm transition-colors duration-200 ${
-                      active
-                        ? "bg-[var(--ink)] text-[var(--paper)]"
-                        : "text-[var(--muted)] hover:text-[var(--ink)]"
-                    }`}
-                  >
-                    {item.label}
-                  </Link>
-                );
-              })}
-            </nav>
-          ) : null}
-
-          {mode === "firebase" && user ? (
-            <button
-              type="button"
-              onClick={() => void signOutUser()}
-              className="hidden rounded-md px-2 py-2 text-xs text-[var(--muted)] transition-colors hover:text-[var(--ink)] sm:inline"
-              title={user.email ?? "로그아웃"}
-            >
-              로그아웃
-            </button>
-          ) : null}
-        </div>
+        <nav className="flex items-center gap-1 sm:gap-2">
+          {NAV.map((item) => {
+            const active =
+              item.href === "/"
+                ? pathname === "/"
+                : pathname.startsWith(item.href);
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={`rounded-md px-3 py-2 text-sm transition-colors duration-200 ${
+                  active
+                    ? "bg-[var(--ink)] text-[var(--paper)]"
+                    : "text-[var(--muted)] hover:text-[var(--ink)]"
+                }`}
+              >
+                {item.label}
+              </Link>
+            );
+          })}
+        </nav>
       </header>
 
       <div className="mx-auto w-full max-w-5xl px-5 pt-1 sm:px-8">
         <p className="text-[11px] uppercase tracking-[0.18em] text-[var(--muted)]">
-          sync ·{" "}
-          {mode === "firebase"
-            ? user
-              ? `firebase · ${user.email ?? "signed in"}`
-              : "firebase · sign in required"
-            : "local demo"}
+          sync · {mode === "firebase" ? "firebase realtime" : "local demo"}
         </p>
       </div>
 
       <main className="mx-auto w-full max-w-5xl flex-1 px-5 pb-16 pt-8 sm:px-8">
         {loading ? (
-          <p className="text-sm text-[var(--muted)]">계정 확인 중…</p>
-        ) : needsLogin ? (
-          <LoginPanel />
+          <p className="text-sm text-[var(--muted)]">불러오는 중…</p>
         ) : (
           children
         )}
